@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  COMPANY_ADMIN
+  COMPANY_USER
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  username String    @unique
+  name     String
+  email    String    @unique
+  password String
+  profile  Profile?
+  role     Role      @default(USER)
+  Discard  Discard[]
+  Company  Company?
+}
+
+model Profile {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  user      User      @relation(fields: [userId], references: [id])
+  firstName String
+  discards  Discard[]
+  points    Int
+  lastName  String
+  phone     String
+  address   String
+  city      String
+  state     String
+  zip       String
+  country   String
+  avatar    String
+}
+
+model Company {
+  id                Int              @id @default(autoincrement())
+  name              String
+  phone             String
+  openingHours      String
+  companyType       String
+  location_id       Int?             @unique
+  location          Location?        @relation(fields: [location_id], references: [id])
+  owner             User             @relation(fields: [ownerId], references: [id])
+  ownerId           Int              @unique
+  discards          Discard[]
+  CompanyCategory   CompanyCategory? @relation(fields: [companyCategoryId], references: [id])
+  companyCategoryId Int?
+  Benefits          Benefits[]
+}
+
+model Benefits {
+  id        Int     @id @default(autoincrement())
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+  name      String
+  points    Int
+}
+
+model Discard {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id])
+  date      DateTime
+  points    Int
+  Profile   Profile? @relation(fields: [profileId], references: [id])
+  profileId Int?
+}
+
+model CompanyCategory {
+  id      Int       @id @default(autoincrement())
+  name    String
+  company Company[]
+}
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  latitude  Float
+  longitude Float
+  Company   Company?
+}
