@@ -17,45 +17,45 @@ enum Role {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  username String    @unique
-  name     String
-  email    String    @unique
-  password String
-  profile  Profile?
-  role     Role      @default(USER)
-  Discard  Discard[]
-  Company  Company?
+  id        Int        @id @default(autoincrement())
+  username  String     @unique
+  name      String
+  email     String     @unique
+  password  String
+  profileId Int        @unique
+  profile   Profile    @relation(fields: [profileId], references: [id])
+  company   Company?
+  role      Role       @default(USER)
+  Discard   Discards[]
 }
 
 model Profile {
-  id        Int       @id @default(autoincrement())
-  userId    Int       @unique
-  user      User      @relation(fields: [userId], references: [id])
+  id        Int        @id @default(autoincrement())
+  user      User?
   firstName String
-  discards  Discard[]
+  discards  Discards[]
   points    Int
   lastName  String
   phone     String
   address   String
   city      String
   state     String
-  zip       String
   country   String
   avatar    String
+  bio       String
 }
 
 model Company {
   id                Int              @id @default(autoincrement())
+  userId            Int              @unique
+  user              User             @relation(fields: [userId], references: [id])
   name              String
   phone             String
   openingHours      String
-  companyType       String
+  address           String
   location_id       Int?             @unique
   location          Location?        @relation(fields: [location_id], references: [id])
-  owner             User             @relation(fields: [ownerId], references: [id])
-  ownerId           Int              @unique
-  discards          Discard[]
+  discards          Discards[]
   CompanyCategory   CompanyCategory? @relation(fields: [companyCategoryId], references: [id])
   companyCategoryId Int?
   Benefits          Benefits[]
@@ -67,17 +67,19 @@ model Benefits {
   company   Company @relation(fields: [companyId], references: [id])
   name      String
   points    Int
+  active    Boolean @default(true)
 }
 
-model Discard {
-  id        Int      @id @default(autoincrement())
+model Discards {
+  id        Int         @id @default(autoincrement())
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User        @relation(fields: [userId], references: [id])
   companyId Int
-  company   Company  @relation(fields: [companyId], references: [id])
+  company   Company     @relation(fields: [companyId], references: [id])
   date      DateTime
+  type      DiscardType
   points    Int
-  Profile   Profile? @relation(fields: [profileId], references: [id])
+  Profile   Profile?    @relation(fields: [profileId], references: [id])
   profileId Int?
 }
 
@@ -92,4 +94,10 @@ model Location {
   latitude  Float
   longitude Float
   Company   Company?
+}
+
+enum DiscardType {
+  BATTERY
+  MEDICINE
+  BOTH
 }
