@@ -1,36 +1,34 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'src/database/prisma.service';
 import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { PrismaService } from 'src/database/prisma.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto) {
-    try {
-      const { username, email, password } = createUserDto;
-      const hashPassword = await bcrypt.hash(password, 10);
+  // async create(createUserDto: CreateUserDto) {
+  //   try {
+  //     const { username, email, password } = createUserDto;
+  //     const hashPassword = await bcrypt.hash(password, 10);
 
-      const user = await this.prismaService.user.create({
-        data: {
-          email: email,
-          name: username,
-          username: username,
-          password: hashPassword,
-        },
-      });
+  //     const user = await this.prismaService.user.create({
+  //       data: {
+  //         email: email,
+  //         name: username,
+  //         username: username,
+  //         password: hashPassword,
+  //       },
+  //     });
 
-      const { password: _, ...result } = user;
-      return result;
-    } catch (error) {
-      if (error.code === 'P2002') {
-        throw new NotFoundException('User already exists');
-      }
-    }
-  }
+  //     const { password: _, ...result } = user;
+  //     return result;
+  //   } catch (error) {
+  //     if (error.code === 'P2002') {
+  //       throw new NotFoundException('User already exists');
+  //     }
+  //   }
+  // }
 
   findAll() {
     return `This action returns all users`;
