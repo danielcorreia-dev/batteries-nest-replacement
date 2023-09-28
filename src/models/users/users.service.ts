@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma, User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from 'src/database/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'src/database/prisma.service';
-import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -11,20 +11,21 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const { username, email, password } = createUserDto;
-      const hashPassword = await bcrypt.hash(password, 10);
+      const data: Prisma.UserCreateInput = {
+        ...createUserDto,
+        password: await bcrypt.hash(createUserDto.password, 10),
+        points: 0,
+        name: createUserDto.username,
+      };
 
-      const user = await this.prismaService.user.create({
-        data: {
-          email: email,
-          name: username,
-          username: username,
-          password: hashPassword,
-        },
+      const createdUser = await this.prismaService.user.create({
+        data,
       });
 
-      const { password: _, ...result } = user;
-      return result;
+      return {
+        ...createdUser,
+        password: undefined,
+      };
     } catch (error) {
       if (error.code === 'P2002') {
         throw new NotFoundException('User already exists');
@@ -32,11 +33,11 @@ export class UsersService {
     }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.prismaService.user.findMany();
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOneById(id: number): Promise<User> {
     try {
       return await this.prismaService.user.findUniqueOrThrow({
         where: {
