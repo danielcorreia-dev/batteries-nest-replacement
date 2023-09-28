@@ -19,6 +19,7 @@ export class UsersController {
     return this.userService.findOneById(+id);
   }
 
+  @UseGuards(JwtGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/')
   async findAll() {
