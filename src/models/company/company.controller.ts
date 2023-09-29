@@ -6,25 +6,15 @@ import {
   NotFoundException,
   Param,
   Patch,
-  Post,
   Query,
 } from '@nestjs/common';
 import { Company } from '@prisma/client';
 import { CompanyService } from './company.service';
-import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Controller('company')
 export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
-
-  @Post()
-  async createCompany(
-    @Body() createCompanyDto: CreateCompanyDto,
-  ): Promise<Company> {
-    const company = await this.companyService.createCompany(createCompanyDto);
-    return company;
-  }
 
   @Get()
   async getCompaniesByName(@Query('name') name: string): Promise<Company[]> {

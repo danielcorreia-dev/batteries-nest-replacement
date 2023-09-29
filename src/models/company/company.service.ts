@@ -1,28 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Company } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/database/prisma.service';
-import { UsersService } from '../users/users.service';
+import { prismaExclude } from 'src/utils/prisma-key-exclude';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @Injectable()
 export class CompanyService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async createCompany(createCompanyDto: CreateCompanyDto): Promise<any> {
-    const company = await this.prisma.company.create({
-      data: {
+    try {
+      const data: Prisma.CompanyCreateInput = {
         ...createCompanyDto,
-      },
-    });
+        password: await bcrypt.hash(createCompanyDto.password, 10),
+      };
 
-    return company;
+      const createdCompany = await this.prisma.company.create({
+        data,
+      });
+
+      return {
+        ...createdCompany,
+        password: undefined,
+      };
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new NotFoundException('Company already exists');
+      }
+    }
   }
 
-  async getCompaniesByName(name?: string): Promise<Company[]> {
+  async findOneByEmail(email: string) {
+    try {
+      return await this.prisma.company.findFirst({ where: { email } });
+    } catch (err) {
+      if (err.code === 'P2025') {
+        throw new NotFoundException('Company not found');
+      }
+    }
+  }
+
+  async getCompaniesByName(name?: string): Promise<any> {
     let where = {};
 
     if (name) {
@@ -37,6 +57,7 @@ export class CompanyService {
 
     return this.prisma.company.findMany({
       where,
+      select: prismaExclude('Company', ['password']),
     });
   }
 
