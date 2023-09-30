@@ -6,8 +6,8 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { JwtGuard } from 'src/common/auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
+import { JwtGuard } from 'src/common/auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -19,7 +19,6 @@ export class UsersController {
     return this.userService.findOneById(+id);
   }
 
-  @UseGuards(JwtGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('/')
   async findAll() {

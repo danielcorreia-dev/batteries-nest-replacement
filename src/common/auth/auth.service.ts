@@ -9,7 +9,7 @@ const EXPIRE_TIME = 30 * 1000;
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private userService: UsersService,
+    private userService: UsersService, // private companyService: CompanyService,
   ) {}
 
   async validateUser(username: string, password: string) {
@@ -24,6 +24,18 @@ export class AuthService {
 
     return null;
   }
+
+  // async validateCompany(username: string, password: string) {
+  //   const company = await this.companyService.findCompanyWithEmail(username);
+
+  //   if (company && (await bcrypt.compare(password, company.password))) {
+  //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //     const { password, ...result } = company;
+  //     return result;
+  //   }
+
+  //   return null;
+  // }
 
   async login(user: User) {
     const payload = {
