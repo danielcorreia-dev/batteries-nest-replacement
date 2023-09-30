@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { prismaExclude } from 'src/utils/primsa-key-exclude';
 
 @Injectable()
 export class UsersService {
@@ -34,7 +35,9 @@ export class UsersService {
   }
 
   async findAll() {
-    return await this.prismaService.user.findMany();
+    return await this.prismaService.user.findMany({
+      select: prismaExclude('User', ['password']),
+    });
   }
 
   async findOneById(id: number): Promise<User> {

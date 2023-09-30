@@ -5,9 +5,9 @@ import { CompanyService } from 'src/models/company/company.service';
 import { UsersService } from 'src/models/users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './strategies/user/jwt-strategy';
-import { LocalStrategy } from './strategies/user/local-strategy';
-import { RefreshJwtStrategy } from './strategies/user/refreshToken.strategy';
+import { JwtStrategy } from './strategies/jwt-strategy';
+import { LocalStrategy } from './strategies/local-strategy';
+import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
 
 @Module({
   providers: [
