@@ -22,6 +22,8 @@ model User {
   bio              String?
   Discard          Discard[]
   userAchievements UserAchievements[]
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -44,17 +46,21 @@ model Company {
   CompanyCategory   CompanyCategory? @relation(fields: [companyCategoryId], references: [id])
   companyCategoryId Int?             @map("company_category_id")
   Benefit           Benefit[]
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
 
   @@map("companies")
 }
 
 model Benefit {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
   points    Int
-  companyId Int     @map("company_id")
-  company   Company @relation(fields: [companyId], references: [id])
-  active    Boolean @default(true)
+  companyId Int      @map("company_id")
+  company   Company  @relation(fields: [companyId], references: [id])
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("benefits")
 }
@@ -68,14 +74,18 @@ model Discard {
   user      User        @relation(fields: [userId], references: [id])
   companyId Int         @map("company_id")
   company   Company     @relation(fields: [companyId], references: [id])
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 
   @@map("discards")
 }
 
 model CompanyCategory {
-  id      Int       @id @default(autoincrement())
-  name    String
-  company Company[]
+  id        Int       @id @default(autoincrement())
+  name      String
+  company   Company[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("company_categories")
 }
@@ -85,14 +95,22 @@ model Location {
   latitude  Float
   longitude Float
   Company   Company?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("locations")
 }
 
 model Achievement {
-  id               Int                @id @default(autoincrement())
-  name             String
-  required         Int
+  id              Int      @id @default(autoincrement())
+  name            String
+  icon            String
+  requiredPoints  Int?     @map("required_points")
+  requiredDiscard Int?     @map("required_discard")
+  description     String
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
   userAchievements UserAchievements[]
 
   @@map("achievements")
