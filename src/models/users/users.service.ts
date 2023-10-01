@@ -66,11 +66,26 @@ export class UsersService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    try {
+      return await this.prismaService.user.update({
+        where: {
+          id,
+        },
+        data: updateUserDto,
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException('User not found');
+      }
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    return await this.prismaService.user.delete({
+      where: {
+        id,
+      },
+    });
   }
 }

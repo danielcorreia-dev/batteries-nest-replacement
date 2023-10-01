@@ -5,6 +5,7 @@ import authConfig from './config/auth.config';
 import { PrismaModule } from './database/prisma.module';
 import { AuthModule } from './common/auth/auth.module';
 import { UsersModule } from './models/users/users.module';
+import { AchievementsModule } from './models/achievements/achievements.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from './models/users/users.module';
     PrismaModule,
     AuthModule,
     UsersModule,
+    AchievementsModule,
   ],
 })
 export class AppModule {}
