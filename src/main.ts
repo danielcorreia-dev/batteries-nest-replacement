@@ -1,9 +1,10 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { useContainer } from 'class-validator';
-import { AllConfigType } from './config/config.type';
-import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { useContainer } from 'class-validator';
+import { AppModule } from './app.module';
+import { TransformerInterceptor } from './common/interceptors/transformer/transformer.interceptor';
+import { AllConfigType } from './config/config.type';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +22,7 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
 
+  app.useGlobalInterceptors(new TransformerInterceptor());
   app.useGlobalPipes(new ValidationPipe());
 
   await app.listen(configService.get<number>('app.port', { infer: true }));

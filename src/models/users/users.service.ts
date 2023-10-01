@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma, User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from 'src/database/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'src/database/prisma.service';
-import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { prismaExclude } from 'src/utils/primsa-key-exclude';
 
 @Injectable()
 export class UsersService {
@@ -11,20 +12,21 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const { username, email, password } = createUserDto;
-      const hashPassword = await bcrypt.hash(password, 10);
+      const data: Prisma.UserCreateInput = {
+        ...createUserDto,
+        password: await bcrypt.hash(createUserDto.password, 10),
+        points: 0,
+        name: createUserDto.username,
+      };
 
-      const user = await this.prismaService.user.create({
-        data: {
-          email: email,
-          name: username,
-          username: username,
-          password: hashPassword,
-        },
+      const createdUser = await this.prismaService.user.create({
+        data,
       });
 
-      const { password: _, ...result } = user;
-      return result;
+      return {
+        ...createdUser,
+        password: undefined,
+      };
     } catch (error) {
       if (error.code === 'P2002') {
         throw new NotFoundException('User already exists');
@@ -32,11 +34,13 @@ export class UsersService {
     }
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.prismaService.user.findMany({
+      select: prismaExclude('User', ['password']),
+    });
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOneById(id: number): Promise<User> {
     try {
       return await this.prismaService.user.findUniqueOrThrow({
         where: {
@@ -62,11 +66,26 @@ export class UsersService {
     }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    try {
+      return await this.prismaService.user.update({
+        where: {
+          id,
+        },
+        data: updateUserDto,
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException('User not found');
+      }
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    return await this.prismaService.user.delete({
+      where: {
+        id,
+      },
+    });
   }
 }
