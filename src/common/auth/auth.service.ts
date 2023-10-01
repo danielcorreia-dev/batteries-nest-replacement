@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
+import { Company, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { CompanyService } from 'src/models/company/company.service';
 import { UsersService } from 'src/models/users/users.service';
 
 const EXPIRE_TIME = 30 * 1000;
@@ -9,7 +10,8 @@ const EXPIRE_TIME = 30 * 1000;
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private userService: UsersService, // private companyService: CompanyService,
+    private userService: UsersService,
+    private companyService: CompanyService,
   ) {}
 
   async validateUser(username: string, password: string) {
@@ -25,19 +27,7 @@ export class AuthService {
     return null;
   }
 
-  // async validateCompany(username: string, password: string) {
-  //   const company = await this.companyService.findCompanyWithEmail(username);
-
-  //   if (company && (await bcrypt.compare(password, company.password))) {
-  //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //     const { password, ...result } = company;
-  //     return result;
-  //   }
-
-  //   return null;
-  // }
-
-  async login(user: User) {
+  async loginUser(user: User) {
     const payload = {
       username: user.username,
       sub: {
@@ -48,6 +38,41 @@ export class AuthService {
 
     return {
       user,
+      backendTokens: {
+        accessToken: await this.jwtService.signAsync(payload),
+        refreshToken: await this.jwtService.signAsync(payload, {
+          expiresIn: '7d',
+          secret: process.env.AUTH_JWT_REFRESH_SECRET,
+        }),
+        expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+      },
+    };
+  }
+
+  async validateCompany(username: string, password: string) {
+    const company =
+      await this.companyService.findOneCompanyWithEmailOrUsername(username);
+
+    if (company && (await bcrypt.compare(password, company.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = company;
+      return result;
+    }
+
+    return null;
+  }
+
+  async loginCompany(company: Company) {
+    const payload = {
+      username: company.username,
+      sub: {
+        name: company.name,
+        email: company.email,
+      },
+    };
+
+    return {
+      company,
       backendTokens: {
         accessToken: await this.jwtService.signAsync(payload),
         refreshToken: await this.jwtService.signAsync(payload, {

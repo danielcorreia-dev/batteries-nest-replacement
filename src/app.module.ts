@@ -5,6 +5,7 @@ import authConfig from './config/auth.config';
 import { PrismaModule } from './database/prisma.module';
 import { AuthModule } from './common/auth/auth.module';
 import { UsersModule } from './models/users/users.module';
+import { CompanyModule } from './models/company/company.module';
 import { AchievementsModule } from './models/achievements/achievements.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { AchievementsModule } from './models/achievements/achievements.module';
     PrismaModule,
     AuthModule,
     UsersModule,
+    CompanyModule,
     AchievementsModule,
   ],
 })
