@@ -1,16 +1,14 @@
-import { CompanyService } from 'src/models/company/company.service';
-import { CreateCompanyDto } from 'src/models/company/dto/create-company.dto';
 import {
-  Controller,
-  Request,
-  Post,
-  UseGuards,
   Body,
+  Controller,
   HttpCode,
   HttpStatus,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { CompanyService } from 'src/models/company/company.service';
+import { CreateCompanyDto } from 'src/models/company/dto/create-company.dto';
 import { CreateUserDto } from 'src/models/users/dto/create-user.dto';
 import { UsersService } from 'src/models/users/users.service';
 import { AuthService } from './auth.service';
