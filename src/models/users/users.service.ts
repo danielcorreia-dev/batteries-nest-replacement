@@ -2,9 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/database/prisma.service';
+import { prismaExclude } from 'src/utils/prisma-key-exclude';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { prismaExclude } from 'src/utils/primsa-key-exclude';
 
 @Injectable()
 export class UsersService {

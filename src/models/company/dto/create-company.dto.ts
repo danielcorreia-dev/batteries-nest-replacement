@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsString, Length } from 'class-validator';
 
 export class CreateCompanyDto {
   @IsString()
@@ -6,6 +6,10 @@ export class CreateCompanyDto {
 
   @IsEmail()
   email: string;
+
+  @IsString()
+  @Length(4, 20)
+  username: string;
 
   @IsString()
   password: string;

@@ -27,19 +27,7 @@ export class AuthService {
     return null;
   }
 
-  async validateCompany(email: string, password: string) {
-    const company = await this.companyService.findOneByEmail(email);
-
-    if (company && (await bcrypt.compare(password, company.password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = company;
-      return result;
-    }
-
-    return null;
-  }
-
-  async login(user: User) {
+  async loginUser(user: User) {
     const payload = {
       username: user.username,
       sub: {
@@ -61,9 +49,22 @@ export class AuthService {
     };
   }
 
+  async validateCompany(username: string, password: string) {
+    const company =
+      await this.companyService.findOneCompanyWithEmailOrUsername(username);
+
+    if (company && (await bcrypt.compare(password, company.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = company;
+      return result;
+    }
+
+    return null;
+  }
+
   async loginCompany(company: Company) {
     const payload = {
-      email: company.email,
+      username: company.username,
       sub: {
         name: company.name,
         email: company.email,
@@ -89,25 +90,6 @@ export class AuthService {
       sub: {
         name: user.name,
         email: user.email,
-      },
-    };
-
-    return {
-      accessToken: await this.jwtService.signAsync(payload),
-      refreshToken: await this.jwtService.signAsync(payload, {
-        expiresIn: '7d',
-        secret: process.env.AUTH_JWT_REFRESH_SECRET,
-      }),
-      expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
-    };
-  }
-
-  async refreshTokenCompny(company: Company) {
-    const payload = {
-      company: company.email,
-      sub: {
-        name: company.name,
-        email: company.email,
       },
     };
 

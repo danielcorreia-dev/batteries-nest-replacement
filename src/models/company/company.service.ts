@@ -32,9 +32,11 @@ export class CompanyService {
     }
   }
 
-  async findOneByEmail(email: string) {
+  async findOneCompanyWithEmailOrUsername(companyInput: string) {
     try {
-      return await this.prisma.company.findFirst({ where: { email } });
+      return await this.prisma.company.findFirst({
+        where: { OR: [{ email: companyInput }, { username: companyInput }] },
+      });
     } catch (err) {
       if (err.code === 'P2025') {
         throw new NotFoundException('Company not found');
