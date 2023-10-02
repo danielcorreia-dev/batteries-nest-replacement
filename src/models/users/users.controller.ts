@@ -6,13 +6,24 @@ import { JwtGuard } from 'src/common/auth/guards/jwt-auth.guard';
 export class UsersController {
   constructor(private userService: UsersService) {}
 
+  @Get('/ranking')
+  async getRanking() {
+    return await this.userService.getRanking();
+  }
+
+  @UseGuards(JwtGuard)
+  @Get(':id/achievements')
+  async getUserAchievements(@Param('id') id: string) {
+    return await this.userService.findUserAchievements(+id);
+  }
+
   @UseGuards(JwtGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return await this.userService.findOneById(+id);
   }
 
-  @Get('/')
+  @Get()
   async findAll() {
     return await this.userService.findAll();
   }

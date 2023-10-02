@@ -127,24 +127,55 @@ export class UsersService {
 
   async findUserAchievements(id: number) {
     try {
-      return await this.prismaService.user
-        .findUnique({
+      const userAchievements =
+        await this.prismaService.userAchievements.findMany({
           where: {
             id,
           },
-        })
-        .userAchievements({
           select: {
-            achievement: {
+            user: {
               select: {
                 id: true,
-                icon: true,
-                name: true,
-                description: true,
               },
             },
+            date: true,
           },
         });
+
+      const allAchievements = await this.prismaService.achievement.findMany({
+        select: {
+          id: true,
+          icon: true,
+          name: true,
+          description: true,
+          requiredDiscard: true,
+          requiredPoints: true,
+        },
+      });
+
+      const userAchievementsIds = userAchievements.map(
+        (userAchievement) => userAchievement.user.id,
+      );
+
+      const userAchievementsWithProgress = allAchievements.map(
+        (achievement) => {
+          const userHasAchievement = userAchievementsIds.includes(
+            achievement.id,
+          );
+
+          const userAchievement = userAchievements.find(
+            (ua) => ua.user.id === id && ua.user.id === achievement.id,
+          );
+
+          return {
+            ...achievement,
+            userHasAchievement,
+            date: userAchievement?.date || null,
+          };
+        },
+      );
+
+      return userAchievementsWithProgress;
     } catch (err) {
       if (err.code === 'P2025') {
         throw new NotFoundException('User not found');
@@ -153,22 +184,41 @@ export class UsersService {
   }
 
   async getRanking() {
-    return await this.prismaService.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        points: true,
-        _count: {
-          select: {
-            Discard: true,
-          },
-        },
-      },
-      orderBy: {
-        points: 'desc',
-      },
-    });
+    try {
+      const query = await this.prismaService.$queryRaw`SELECT
+          u.id,
+          u.name,
+          u.avatar,
+          u.points,
+          c.countDiscards
+      from
+          users as u
+          left JOIN (
+              select
+                  user_id,
+                  COUNT(*) as countDiscards
+              from
+                  discards
+              group by
+                  user_id
+          ) as c on u.id = c.user_id
+          ORDER BY c.countDiscards DESC, u.points DESC`;
+
+      return JSON.parse(
+        JSON.stringify(query, (key, value) =>
+          typeof value === 'bigint' ? value.toString() : value,
+        ),
+      ).map((user: any) => {
+        const obj = {
+          ...user,
+          discards: Number(user.countdiscards),
+        };
+        delete obj.countdiscards;
+        return obj;
+      });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
