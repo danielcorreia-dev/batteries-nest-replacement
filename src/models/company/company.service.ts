@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { DiscardType, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/database/prisma.service';
 import { prismaExclude } from 'src/utils/prisma-key-exclude';
@@ -44,6 +44,12 @@ export class CompanyService {
     }
   }
 
+  async findAllCompanies() {
+    return await this.prisma.company.findMany({
+      select: prismaExclude('Company', ['password']),
+    });
+  }
+
   async getCompaniesByName(name?: string): Promise<any> {
     let where = {};
 
@@ -60,6 +66,19 @@ export class CompanyService {
     return this.prisma.company.findMany({
       where,
       select: prismaExclude('Company', ['password']),
+    });
+  }
+
+  async createDiscard() {
+    return await this.prisma.discard.create({
+      data: {
+        companyId: 1,
+        userId: 1,
+        date: new Date(),
+        points: 10,
+        type: DiscardType.BATTERY,
+        createdAt: new Date(),
+      },
     });
   }
 

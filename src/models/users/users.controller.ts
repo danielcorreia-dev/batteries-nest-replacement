@@ -1,11 +1,4 @@
-import {
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Param,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtGuard } from 'src/common/auth/guards/jwt-auth.guard';
 
@@ -19,9 +12,14 @@ export class UsersController {
     return await this.userService.findOneById(+id);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @Get('/')
   async findAll() {
     return await this.userService.findAll();
+  }
+
+  @UseGuards(JwtGuard)
+  @Get(':id/achievements')
+  async findAchievements(@Param('id') id: string) {
+    return await this.userService.findUserAchievements(+id);
   }
 }
