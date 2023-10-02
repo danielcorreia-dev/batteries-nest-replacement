@@ -237,10 +237,27 @@ export class UsersService {
   }
 
   async remove(id: number) {
-    return await this.prismaService.user.delete({
-      where: {
-        id,
-      },
-    });
+    try {
+      await this.prismaService.userAchievements.deleteMany({
+        where: {
+          id,
+        },
+      });
+
+      await this.prismaService.discard.deleteMany({
+        where: {
+          id,
+        },
+      });
+
+      return await this.prismaService.user.delete({
+        where: {
+          id,
+        },
+      });
+    } catch (e) {
+      if (e.code === 'P2025') throw new NotFoundException('User not found');
+      throw e;
+    }
   }
 }
