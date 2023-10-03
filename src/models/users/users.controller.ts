@@ -1,6 +1,15 @@
-import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtGuard } from 'src/common/auth/guards/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -32,6 +41,12 @@ export class UsersController {
   @Get(':id/achievements')
   async findAchievements(@Param('id') id: string) {
     return await this.userService.findUserAchievements(+id);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return await this.userService.update(+id, updateUserDto);
   }
 
   @UseGuards(JwtGuard)

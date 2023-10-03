@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/database/prisma.service';
@@ -186,23 +190,24 @@ export class UsersService {
   async getRanking() {
     try {
       const query = await this.prismaService.$queryRaw`SELECT
-          u.id,
-          u.name,
-          u.avatar,
-          u.points,
-          c.countDiscards
-      from
-          users as u
-          left JOIN (
-              select
-                  user_id,
-                  COUNT(*) as countDiscards
-              from
-                  discards
-              group by
-                  user_id
-          ) as c on u.id = c.user_id
-          ORDER BY c.countDiscards DESC, u.points DESC`;
+    u.id,
+    u.name,
+    u.avatar,
+    u.points,
+    c.countDiscards
+FROM
+    users AS u
+LEFT JOIN (
+    SELECT
+        user_id,
+        COUNT(*) AS countDiscards
+    FROM
+        discards
+    GROUP BY
+        user_id
+) AS c ON u.id = c.user_id
+ORDER BY
+COALESCE(CAST(c.countDiscards AS INTEGER), 0) DESC, u.points DESC;`;
 
       return JSON.parse(
         JSON.stringify(query, (key, value) =>
@@ -223,6 +228,35 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
+      const userPassword = await this.prismaService.user.findUnique({
+        where: {
+          id,
+        },
+        select: {
+          password: true,
+        },
+      });
+
+      const { password, newPassword } = updateUserDto;
+
+      if (password && newPassword) {
+        const check = await bcrypt.compare(password, userPassword);
+
+        if (!check) {
+          return new UnprocessableEntityException('Password does not match');
+        }
+
+        delete updateUserDto.password;
+        updateUserDto.password = await bcrypt.hash(
+          updateUserDto.newPassword,
+          10,
+        );
+        delete updateUserDto.newPassword;
+      } else {
+        delete updateUserDto.password;
+        delete updateUserDto.newPassword;
+      }
+
       return await this.prismaService.user.update({
         where: {
           id,
@@ -233,6 +267,8 @@ export class UsersService {
       if (error.code === 'P2025') {
         throw new NotFoundException('User not found');
       }
+
+      throw error;
     }
   }
 
