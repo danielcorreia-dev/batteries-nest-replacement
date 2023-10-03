@@ -16,6 +16,7 @@ export class UsersService {
         ...createUserDto,
         password: await bcrypt.hash(createUserDto.password, 10),
         points: 0,
+        discards: 0,
         name: createUserDto.username,
       };
 

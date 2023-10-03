@@ -18,6 +18,7 @@ model User {
   password         String
   username         String             @unique
   points           Int
+  discards         Int
   avatar           String?
   bio              String?
   Discard          Discard[]

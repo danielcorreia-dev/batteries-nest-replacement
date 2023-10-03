@@ -1,6 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { DiscardType, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { DiscardType } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function seed() {
@@ -13,6 +12,7 @@ async function seed() {
         password: await bcrypt.hash('teste123456', 10),
         username: 'username1',
         points: 100,
+        discards: 3,
       },
       {
         name: 'User2',
@@ -20,6 +20,7 @@ async function seed() {
         password: await bcrypt.hash('teste123456', 10),
         username: 'username2',
         points: 200,
+        discards: 2,
       },
     ];
 
