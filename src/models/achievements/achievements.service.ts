@@ -1,25 +1,74 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { NewDiscardEvent } from 'src/common/events/new.discard.event';
+import { PrismaService } from 'src/database/prisma.service';
 import { CreateAchievementDto } from './dto/create-achievement.dto';
 import { UpdateAchievementDto } from './dto/update-achievement.dto';
-import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class AchievementsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   create(createAchievementDto: CreateAchievementDto) {
-    return this.prismaService.achievement.create({
+    return this.prisma.achievement.create({
       data: createAchievementDto,
     });
   }
 
+  @OnEvent('new.discard')
+  async checkAchievementUnlock(payload: NewDiscardEvent) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const unlockableAchievements = await this.prisma.achievement.findMany({
+      where: {
+        OR: [
+          {
+            requiredPoints: { lte: user.totalPoints },
+          },
+          {
+            requiredDiscard: { lte: user.discards },
+          },
+        ],
+      },
+    });
+
+    if (unlockableAchievements.length > 0) {
+      for await (const achievement of unlockableAchievements) {
+        this.prisma.userAchievements.create({
+          data: {
+            userId: user.id,
+            achievementsId: achievement.id,
+            date: new Date(),
+          },
+        });
+
+        this.eventEmitter.emit('unlockedAchievement', {
+          userId: user.id,
+          achievementId: achievement.id,
+          date: new Date(),
+        });
+      }
+
+      return unlockableAchievements;
+    }
+
+    return null;
+  }
+
   findAll() {
-    return this.prismaService.achievement.findMany();
+    return this.prisma.achievement.findMany();
   }
 
   async findOne(id: number) {
     try {
-      return await this.prismaService.achievement.findFirstOrThrow({
+      return await this.prisma.achievement.findFirstOrThrow({
         where: {
           id,
         },
@@ -32,7 +81,7 @@ export class AchievementsService {
   }
 
   update(id: number, updateAchievementDto: UpdateAchievementDto) {
-    return this.prismaService.achievement.update({
+    return this.prisma.achievement.update({
       where: {
         id,
       },
@@ -41,7 +90,7 @@ export class AchievementsService {
   }
 
   remove(id: number) {
-    return this.prismaService.achievement.delete({
+    return this.prisma.achievement.delete({
       where: {
         id,
       },

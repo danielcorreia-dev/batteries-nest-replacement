@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DiscardType, Prisma } from '@prisma/client';
+import { Company, DiscardType, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/database/prisma.service';
 import { prismaExclude } from 'src/utils/prisma-key-exclude';
@@ -30,6 +30,30 @@ export class CompanyService {
         throw new NotFoundException('Company already exists');
       }
     }
+  }
+
+  async findOne(id: number): Promise<Company> {
+    const company = await this.prisma.company.findUnique({
+      where: { id: id },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    return company;
+  }
+
+  async findOne(id: number): Promise<Company> {
+    const company = await this.prisma.company.findUnique({
+      where: { id: id },
+    });
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    return company;
   }
 
   async findOneCompanyWithEmail(email: string) {

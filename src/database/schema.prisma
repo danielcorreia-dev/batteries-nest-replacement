@@ -18,6 +18,8 @@ model User {
   password         String
   username         String             @unique
   points           Int
+  totalPoints      Int?               @default(0) @map("total_points")
+  discards         Int
   avatar           String?
   bio              String?
   Discard          Discard[]
