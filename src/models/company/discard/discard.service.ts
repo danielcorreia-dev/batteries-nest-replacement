@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NewDiscardEvent } from 'src/common/events/new.discard.event';
-import { SseService } from 'src/common/events/sse/sse.service';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateDiscardDto } from './dto/create-discard.dto';
 
@@ -9,7 +8,6 @@ import { CreateDiscardDto } from './dto/create-discard.dto';
 export class DiscardService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly sse: SseService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -19,6 +17,9 @@ export class DiscardService {
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
+        totalPoints: {
+          increment: points,
+        },
         points: {
           increment: points,
         },

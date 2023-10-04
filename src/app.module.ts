@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AuthModule } from './common/auth/auth.module';
-import { SseModule } from './common/events/sse/sse.module';
 import appConfig from './config/app.config';
 import authConfig from './config/auth.config';
 import { PrismaModule } from './database/prisma.module';
@@ -26,7 +25,6 @@ import { UsersModule } from './models/users/users.module';
     CompanyModule,
     DiscardModule,
     AchievementsModule,
-    SseModule,
   ],
 })
 export class AppModule {}

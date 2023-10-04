@@ -30,10 +30,10 @@ export class AchievementsService {
       where: {
         OR: [
           {
-            requiredPoints: { gte: user.points },
+            requiredPoints: { lte: user.totalPoints },
           },
           {
-            requiredDiscard: { gte: user.discards },
+            requiredDiscard: { lte: user.discards },
           },
         ],
       },
@@ -48,9 +48,11 @@ export class AchievementsService {
             date: new Date(),
           },
         });
-        this.eventEmitter.emit('unlocked.achievement', {
-          user: user.id,
-          achievement: achievement.id,
+
+        this.eventEmitter.emit('unlockedAchievement', {
+          userId: user.id,
+          achievementId: achievement.id,
+          date: new Date(),
         });
       }
 
