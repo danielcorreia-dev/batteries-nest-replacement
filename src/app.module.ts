@@ -8,6 +8,9 @@ import appConfig from './config/app.config';
 import authConfig from './config/auth.config';
 import { PrismaModule } from './database/prisma.module';
 import { AchievementsModule } from './models/achievements/achievements.module';
+import { CompanyModule } from './models/company/company.module';
+import { DiscardModule } from './models/company/discard/discard.module';
+import { UsersModule } from './models/users/users.module';
 
 @Module({
   imports: [

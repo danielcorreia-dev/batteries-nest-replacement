@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from './models/users/users.service';
-import { CompanyService } from './models/company/company.service';
 import Fuse from 'fuse.js';
+import { CompanyService } from './models/company/company.service';
+import { UsersService } from './models/users/users.service';
 
 @Injectable()
 export class AppService {

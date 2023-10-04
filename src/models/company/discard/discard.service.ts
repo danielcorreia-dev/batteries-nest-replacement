@@ -53,7 +53,7 @@ export class DiscardService {
     });
 
     if (!existingDiscard) {
-      throw new NotFoundException('Descarte não encontrado');
+      throw new NotFoundException('Discard not found.');
     }
 
     return this.prisma.discard.delete({

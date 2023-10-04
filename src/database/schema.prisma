@@ -12,20 +12,21 @@ datasource db {
 }
 
 model User {
-  id               Int                @id @default(autoincrement())
-  name             String
-  email            String             @unique
-  password         String
-  username         String             @unique
-  points           Int
-  totalPoints      Int?               @default(0) @map("total_points")
-  discards         Int
-  avatar           String?
-  bio              String?
-  Discard          Discard[]
-  userAchievements UserAchievements[]
-  createdAt        DateTime           @default(now()) @map("created_at")
-  updatedAt        DateTime           @updatedAt @map("updated_at")
+  id                    Int                     @id @default(autoincrement())
+  name                  String
+  email                 String                  @unique
+  password              String
+  username              String                  @unique
+  points                Int
+  totalPoints           Int?                    @default(0) @map("total_points")
+  discards              Int
+  avatar                String?
+  bio                   String?
+  Discard               Discard[]
+  userAchievements      UserAchievements[]
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  UserRetrievedBenefits UserRetrievedBenefits[]
 
   @@map("users")
 }
@@ -54,14 +55,16 @@ model Company {
 }
 
 model Benefit {
-  id        Int      @id @default(autoincrement())
-  name      String
-  points    Int
-  companyId Int      @map("company_id")
-  company   Company  @relation(fields: [companyId], references: [id])
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                    Int                     @id @default(autoincrement())
+  name                  String
+  points                Int
+  description           String?
+  companyId             Int                     @map("company_id")
+  company               Company                 @relation(fields: [companyId], references: [id])
+  active                Boolean                 @default(true)
+  createdAt             DateTime                @default(now()) @map("created_at")
+  updatedAt             DateTime                @updatedAt @map("updated_at")
+  UserRetrievedBenefits UserRetrievedBenefits[]
 
   @@map("benefits")
 }
@@ -126,6 +129,18 @@ model UserAchievements {
   date           DateTime
 
   @@map("user_achievements")
+}
+
+model UserRetrievedBenefits {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  benefitId Int      @map("benefit_id")
+  benefit   Benefit  @relation(fields: [benefitId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_retrived_benefits")
 }
 
 enum DiscardType {
