@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "companies" ALTER COLUMN "opening_hours" DROP NOT NULL,
+ALTER COLUMN "close_hours" DROP NOT NULL,
+ALTER COLUMN "phone" DROP NOT NULL,
+ALTER COLUMN "zip" DROP NOT NULL,
+ALTER COLUMN "number" DROP NOT NULL;

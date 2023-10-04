@@ -9,7 +9,6 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { Company } from '@prisma/client';
 import { CompanyService } from './company.service';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
@@ -18,13 +17,22 @@ export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Get('search')
-  async getCompaniesByName(@Query('name') name: string): Promise<Company[]> {
+  async getCompaniesByName(@Query('name') name: string) {
     return await this.companyService.getCompaniesByName(name);
   }
 
   @Get()
   async findAll(): Promise<any[]> {
     return await this.companyService.findAllCompanies();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const company = await this.companyService.findOneCompanyById(+id);
+    if (!company) {
+      throw new NotFoundException('Company not found.');
+    }
+    return company;
   }
 
   @Patch(':id')
@@ -43,7 +51,7 @@ export class CompanyController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
+  async delete(@Param('id') id: string) {
     await this.companyService.delete(+id);
   }
 

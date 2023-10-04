@@ -28,7 +28,6 @@ async function seed() {
       {
         name: 'Company1',
         email: 'company1@example.com',
-        username: 'company1username',
         password: await bcrypt.hash('teste123456', 10),
         openingHours: '8:00 AM',
         closeHours: '5:00 PM',
@@ -39,7 +38,6 @@ async function seed() {
       {
         name: 'Company2',
         email: 'company2@example.com',
-        username: 'company2username',
         password: await bcrypt.hash('teste123456', 10),
         openingHours: '9:00 AM',
         closeHours: '6:00 PM',

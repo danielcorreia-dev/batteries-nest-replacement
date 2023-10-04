@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './common/auth/auth.module';
 import appConfig from './config/app.config';
 import authConfig from './config/auth.config';
 import { PrismaModule } from './database/prisma.module';
-import { AuthModule } from './common/auth/auth.module';
-import { UsersModule } from './models/users/users.module';
-import { CompanyModule } from './models/company/company.module';
 import { AchievementsModule } from './models/achievements/achievements.module';
+import { CompanyModule } from './models/company/company.module';
+import { UsersModule } from './models/users/users.module';
 
 @Module({
   imports: [
@@ -22,5 +24,7 @@ import { AchievementsModule } from './models/achievements/achievements.module';
     CompanyModule,
     AchievementsModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -32,10 +32,23 @@ export class CompanyService {
     }
   }
 
-  async findOneCompanyWithEmailOrUsername(companyInput: string) {
+  async findOneCompanyWithEmail(email: string) {
     try {
       return await this.prisma.company.findFirst({
-        where: { OR: [{ email: companyInput }, { username: companyInput }] },
+        where: { email: email },
+      });
+    } catch (err) {
+      if (err.code === 'P2025') {
+        throw new NotFoundException('Company not found');
+      }
+    }
+  }
+
+  async findOneCompanyById(id: number) {
+    try {
+      return await this.prisma.company.findUnique({
+        where: { id: id },
+        select: prismaExclude('Company', ['password']),
       });
     } catch (err) {
       if (err.code === 'P2025') {
@@ -50,20 +63,20 @@ export class CompanyService {
     });
   }
 
-  async getCompaniesByName(name?: string): Promise<any> {
+  async getCompaniesByName(name?: string) {
+    if (!name) return [];
     let where = {};
 
     if (name) {
-      const formattedName = name.replace(/\-+/g, ' ');
       where = {
         name: {
-          contains: formattedName,
+          contains: name,
           mode: 'insensitive',
         },
       };
     }
 
-    return this.prisma.company.findMany({
+    return await this.prisma.company.findMany({
       where,
       select: prismaExclude('Company', ['password']),
     });
@@ -102,7 +115,7 @@ export class CompanyService {
     return updatedCompany;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number): Promise<any> {
     const company = await this.prisma.company.findUnique({
       where: { id: id },
     });
@@ -111,6 +124,14 @@ export class CompanyService {
       throw new NotFoundException('Company not found.');
     }
 
-    await this.prisma.company.delete({ where: { id: id } });
+    await this.prisma.discard.deleteMany({
+      where: { companyId: id },
+    });
+
+    await this.prisma.benefit.deleteMany({
+      where: { companyId: id },
+    });
+
+    return await this.prisma.company.delete({ where: { id: id } });
   }
 }

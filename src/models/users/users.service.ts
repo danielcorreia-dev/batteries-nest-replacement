@@ -38,10 +38,117 @@ export class UsersService {
     }
   }
 
+  async getUsersByName(name: string) {
+    if (!name) return [];
+    return await this.prismaService.user.findMany({
+      where: {
+        name: {
+          contains: name,
+          mode: 'insensitive',
+        },
+      },
+      select: prismaExclude('User', ['password']),
+    });
+  }
+
   async findAll() {
     return await this.prismaService.user.findMany({
       select: prismaExclude('User', ['password']),
     });
+  }
+
+  async findProfile(id: number) {
+    try {
+      const query = await this.prismaService.user.findUniqueOrThrow({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          username: true,
+          bio: true,
+          points: true,
+          avatar: true,
+          createdAt: true,
+          Discard: {
+            select: {
+              date: true,
+              type: true,
+              points: true,
+              company: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+          userAchievements: {
+            select: {
+              achievement: {
+                select: {
+                  id: true,
+                  icon: true,
+                  name: true,
+                  description: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const discards = await this.prismaService.discard.findMany({
+        where: {
+          date: {
+            gte: new Date(new Date().setDate(new Date().getDate() - 30)),
+            lt: new Date(),
+          },
+        },
+        include: {
+          user: {
+            include: {
+              userAchievements: true,
+            },
+          },
+        },
+      });
+
+      const totalDiscards = discards.length;
+      const totalPoints = discards.reduce(
+        (sum, discard) => sum + discard.points,
+        0,
+      );
+      const totalAchievements = discards.reduce(
+        (sum, discard) => sum + discard.user.userAchievements.length,
+        0,
+      );
+
+      const metrics = {
+        totalDiscards,
+        totalPoints,
+        totalAchievements,
+      };
+
+      const modifiedQuery = {
+        ...query,
+        discards: query.Discard.map((discard) => ({
+          id: discard.company.id,
+          name: discard.company.name,
+          points: discard.points,
+        })),
+        metrics,
+      };
+
+      delete modifiedQuery.Discard;
+      return modifiedQuery;
+    } catch (err) {
+      if (err.code === 'P2025') {
+        throw new NotFoundException('User not found');
+      }
+    }
   }
 
   async findOneById(id: number) {
@@ -61,6 +168,7 @@ export class UsersService {
           Discard: {
             select: {
               date: true,
+              type: true,
               points: true,
               company: {
                 select: {
@@ -240,7 +348,7 @@ COALESCE(CAST(c.countDiscards AS INTEGER), 0) DESC, u.points DESC;`;
       const { password, newPassword } = updateUserDto;
 
       if (password && newPassword) {
-        const check = await bcrypt.compare(password, userPassword);
+        const check = await bcrypt.compare(password, userPassword.password);
 
         if (!check) {
           return new UnprocessableEntityException('Password does not match');

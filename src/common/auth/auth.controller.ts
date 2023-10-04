@@ -25,16 +25,12 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @Post('login/user')
+  @Post('login')
   async login(@Request() req) {
-    return this.authService.loginUser(req.user);
-  }
+    if (req.headers['user-type'] === 'company')
+      return this.authService.loginCompany(req.user);
 
-  @UseGuards(LocalAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @Post('login/company')
-  async loginCompany(@Request() req) {
-    return this.authService.loginCompany(req.user);
+    return this.authService.loginUser(req.user);
   }
 
   @Post('register/user')

@@ -32,13 +32,12 @@ model Company {
   id                Int              @id @default(autoincrement())
   name              String
   email             String           @unique
-  username          String           @unique
   password          String
-  openingHours      String           @map("opening_hours")
-  closeHours        String           @map("close_hours")
-  phone             String
-  zip               String
-  number            String
+  openingHours      String?          @map("opening_hours")
+  closeHours        String?          @map("close_hours")
+  phone             String?
+  zip               String?
+  number            String?
   addressComplement String?          @map("address_complement")
   locationId        Int?             @unique @map("location_id")
   location          Location?        @relation(fields: [locationId], references: [id])

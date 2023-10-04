@@ -38,6 +38,12 @@ export class UsersController {
   }
 
   @UseGuards(JwtGuard)
+  @Get(':id/profile')
+  async findProfile(@Param('id') id: string) {
+    return await this.userService.findProfile(+id);
+  }
+
+  @UseGuards(JwtGuard)
   @Get(':id/achievements')
   async findAchievements(@Param('id') id: string) {
     return await this.userService.findUserAchievements(+id);

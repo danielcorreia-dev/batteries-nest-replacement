@@ -5,7 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { CompanyService } from 'src/models/company/company.service';
 import { UsersService } from 'src/models/users/users.service';
 
-const EXPIRE_TIME = 30 * 1000;
+const EXPIRE_TIME = 4 * 1000 * 60 * 60;
+const REFRESH_EXPIRE_TIME = 7 * 24 * 60 * 60 * 1000;
 @Injectable()
 export class AuthService {
   constructor(
@@ -28,6 +29,7 @@ export class AuthService {
   }
 
   async loginUser(user: User) {
+    console.log(user);
     const payload = {
       username: user.username,
       sub: {
@@ -36,8 +38,10 @@ export class AuthService {
       },
     };
 
+    const typedUser = { ...user, type: 'user' };
+
     return {
-      user,
+      user: typedUser,
       backendTokens: {
         accessToken: await this.jwtService.signAsync(payload),
         refreshToken: await this.jwtService.signAsync(payload, {
@@ -50,8 +54,7 @@ export class AuthService {
   }
 
   async validateCompany(username: string, password: string) {
-    const company =
-      await this.companyService.findOneCompanyWithEmailOrUsername(username);
+    const company = await this.companyService.findOneCompanyWithEmail(username);
 
     if (company && (await bcrypt.compare(password, company.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -64,15 +67,17 @@ export class AuthService {
 
   async loginCompany(company: Company) {
     const payload = {
-      username: company.username,
+      username: company.email,
       sub: {
         name: company.name,
         email: company.email,
       },
     };
 
+    const typedCompany = { ...company, type: 'company' };
+
     return {
-      company,
+      user: typedCompany,
       backendTokens: {
         accessToken: await this.jwtService.signAsync(payload),
         refreshToken: await this.jwtService.signAsync(payload, {
@@ -99,7 +104,7 @@ export class AuthService {
         expiresIn: '7d',
         secret: process.env.AUTH_JWT_REFRESH_SECRET,
       }),
-      expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+      expiresIn: new Date().setTime(new Date().getTime() + REFRESH_EXPIRE_TIME),
     };
   }
 }
