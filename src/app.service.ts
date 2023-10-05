@@ -15,7 +15,7 @@ export class AppService {
   }
 
   async search(query?: string) {
-    if (!query) return { users: [], companies: [] };
+    if (!query) return [];
 
     const users = await this.userService.getUsersByName(query);
     const companies = await this.companyService.getCompaniesByName(query);
@@ -34,7 +34,7 @@ export class AppService {
 
     const options = {
       keys: ['name'],
-      threshold: 0.3,
+      threshold: 0.4,
     };
 
     const fuse = new Fuse(allData.flat(), options);

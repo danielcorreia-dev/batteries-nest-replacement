@@ -39,8 +39,15 @@ export class BenefitService {
     });
   }
 
-  async findAll() {
-    return this.prisma.benefit.findMany();
+  async findAll(id: number) {
+    return this.prisma.benefit.findMany({
+      where: {
+        companyId: id,
+      },
+      orderBy: {
+        active: 'desc',
+      },
+    });
   }
 
   async findOne(id: number) {

@@ -1,10 +1,12 @@
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Length, Min } from 'class-validator';
 
 export class CreateBenefitDto {
   @IsString()
   @Length(3, 50)
   readonly name: string;
 
+  @IsNumber()
+  @Min(1)
   readonly points: number;
 
   @IsString()

@@ -11,10 +11,14 @@ export class DiscardService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async create(createDiscardDto: CreateDiscardDto) {
-    const { type, points, userId, companyId } = createDiscardDto;
+  async create(
+    companyId: number,
+    userId: number,
+    createDiscardDto: CreateDiscardDto,
+  ) {
+    const { type, points } = createDiscardDto;
 
-    const user = await this.prisma.user.update({
+    await this.prisma.user.update({
       where: { id: userId },
       data: {
         totalPoints: {

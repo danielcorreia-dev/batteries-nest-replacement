@@ -7,22 +7,21 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
-import { UsersService } from 'src/models/users/users.service';
 import { BenefitService } from './benefits.service';
 import { CreateBenefitDto } from './dto/create-benefit.dto';
 import { UpdateBenefitDto } from './dto/update-benefit.dto';
+import { JwtGuard } from 'src/common/auth/guards/jwt-auth.guard';
 
-@Controller('company/:id/benefit')
+@Controller('company/:companyId/benefits')
 export class BenefitController {
-  constructor(
-    private readonly benefitService: BenefitService,
-    private readonly userService: UsersService,
-  ) {}
+  constructor(private readonly benefitService: BenefitService) {}
 
   @Post()
+  @UseGuards(JwtGuard)
   async create(
-    @Param('id') id: string,
+    @Param('companyId') id: string,
     @Body() createBenefitDto: CreateBenefitDto,
   ) {
     return this.benefitService.create({
@@ -32,6 +31,7 @@ export class BenefitController {
   }
 
   @Post('redeem/:userId/:benefitId')
+  @UseGuards(JwtGuard)
   async redeemBenefit(
     @Param('userId') userId: number,
     @Param('benefitId') benefitId: number,
@@ -39,9 +39,10 @@ export class BenefitController {
     return this.benefitService.redeemBenefit(+userId, +benefitId);
   }
 
+  @UseGuards(JwtGuard)
   @Get()
-  findAll() {
-    return this.benefitService.findAll();
+  findAll(@Param('companyId') id: string) {
+    return this.benefitService.findAll(+id);
   }
 
   @Get(':id')

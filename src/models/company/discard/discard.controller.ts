@@ -3,20 +3,20 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DiscardService } from './discard.service';
 import { CreateDiscardDto } from './dto/create-discard.dto';
 
-@Controller('company/:id/discard')
+@Controller('company/:companyId/discard')
 export class DiscardController {
   constructor(
     private readonly discardService: DiscardService,
     private eventEmitter: EventEmitter2,
   ) {}
 
-  @Post()
+  @Post(':id')
   async create(
-    @Param('id') id: string,
+    @Param('companyId') companyId: string,
+    @Param('id') userId: string,
     @Body() createDiscardDto: CreateDiscardDto,
   ) {
-    return this.discardService.create({
-      companyId: +id,
+    return this.discardService.create(+companyId, +userId, {
       ...createDiscardDto,
     });
   }
